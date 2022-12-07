@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon --watch 'src/' --exec 'ts-node -r tsconfig-paths/register src/server.ts' -e ts",
+    "dev": "nodemon --watch 'src/' --exec 'ts-node --esm -r tsconfig-paths/register src/server.ts' -e ts",
     "husky": "husky install"
   },
   "keywords": [],
@@ -13,11 +14,13 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "pg": "^8.8.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.14",
+    "@types/pg": "^8.6.5",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.45.1",
     "eslint": "^8.29.0",
