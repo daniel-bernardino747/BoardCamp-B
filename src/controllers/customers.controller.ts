@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import connection from '../database/index.js'
 // import connection from '@/database'
 
-export async function viewAll(req: Request, res: Response) {
+export async function getCustomers(req: Request, res: Response) {
   try {
     const customers = await connection.query('SELECT * FROM customers;')
     return res.status(200).send({ message: customers.rows })
@@ -11,7 +11,7 @@ export async function viewAll(req: Request, res: Response) {
   }
 }
 
-export async function viewOne(req: Request, res: Response) {
+export async function getCustomer(req: Request, res: Response) {
   const { user } = res.locals
   try {
     return res.status(200).send({ message: user })
