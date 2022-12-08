@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import connection from '../database/index.js'
 // import connection from '@/database'
 
-export async function validateUser(
+export async function validateExistenceCustomer(
   req: Request,
   res: Response,
   next: NextFunction
