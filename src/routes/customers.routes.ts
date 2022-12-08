@@ -8,6 +8,12 @@ const validationsToCreateCustomer = [
   middle.validateUsedCPF,
 ]
 
+const validationsToPutCustomer = [
+  middle.validateExistenceCustomer,
+  middle.validateCustomerSchema,
+  middle.validateUsedCPF,
+]
+
 const routes = express.Router()
 
 routes.get('/customers', customers.viewAll)
@@ -17,7 +23,9 @@ routes.post('/customers', validationsToCreateCustomer, customers.create)
 routes.get(
   '/customers/:id',
   middle.validateExistenceCustomer,
-  customers.ViewOne
+  customers.viewOne
 )
+
+routes.put('/customers/:id', validationsToPutCustomer, customers.update)
 
 export default routes

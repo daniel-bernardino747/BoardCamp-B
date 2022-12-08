@@ -11,7 +11,7 @@ export async function viewAll(req: Request, res: Response) {
   }
 }
 
-export async function ViewOne(req: Request, res: Response) {
+export async function viewOne(req: Request, res: Response) {
   const { validUserInDatabase } = res.locals
   try {
     return res.status(200).send({ message: validUserInDatabase })
@@ -31,6 +31,23 @@ export async function create(req: Request, res: Response) {
     )
 
     return res.sendStatus(201)
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+}
+export async function update(req: Request, res: Response) {
+  const { id } = req.params
+  const {
+    newCustomer: { name, phone, cpf, birthday },
+  } = res.locals
+
+  try {
+    await connection.query(
+      'UPDATE customers SET name=$1,phone=$2,cpf=$3,birthday=$4 WHERE id=$5',
+      [name, phone, cpf, birthday, id]
+    )
+
+    return res.sendStatus(200)
   } catch (err) {
     return res.status(500).send({ error: err })
   }

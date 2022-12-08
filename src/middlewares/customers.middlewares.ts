@@ -19,7 +19,7 @@ export async function validateExistenceCustomer(
 
     if (!existingUser) return res.sendStatus(404)
 
-    res.locals.validUserInDatabase = user.rows[0]
+    res.locals.validCustomer = user.rows[0]
   } catch (err) {
     return res.status(500).send({ error: err })
   }
@@ -44,7 +44,7 @@ export async function validateCustomerSchema(
       return res.status(400).send({ error: arrayErrors })
     }
 
-    res.locals.validCustomerSchema = customer
+    res.locals.validCustomer = customer
   } catch (err) {
     return res.status(500).send({ error: err })
   }
@@ -55,17 +55,17 @@ export async function validateUsedCPF(
   res: Response,
   next: NextFunction
 ) {
-  const { validCustomerSchema } = res.locals
+  const { validCustomer } = res.locals
 
   try {
     const searchCustomerInDatabase = await connection.query(
       'SELECT * FROM customers WHERE cpf=$1',
-      [validCustomerSchema.cpf]
+      [validCustomer.cpf]
     )
     const existingCustomer = !!searchCustomerInDatabase.rows.length
     if (existingCustomer) return res.sendStatus(409)
 
-    res.locals.newCustomer = validCustomerSchema
+    res.locals.newCustomer = validCustomer
   } catch (err) {
     return res.status(500).send({ error: err })
   }
