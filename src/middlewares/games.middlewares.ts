@@ -15,19 +15,16 @@ export async function validateExistenceInDatabase(
       'SELECT * FROM categories WHERE id = $1;',
       [Number(game.categoryId)]
     )
-    console.log(1)
     const searchGameInDatabase = await connection.query(
       'SELECT * FROM games WHERE name = $1;',
       [game.name]
     )
-    console.log(2)
 
     const existingCategory = !!searchCategoryInDatabase.rows.length
     const existingGame = !!searchGameInDatabase.rows.length
 
     if (!existingCategory) return res.sendStatus(400)
     if (existingGame) return res.sendStatus(409)
-    console.log(3)
 
     res.locals.validGameInDatabase = game
   } catch (err) {
@@ -47,7 +44,6 @@ export async function validateGameSchema(
       validGameInDatabase,
       { abortEarly: false }
     )
-    console.log(1)
 
     if (validationError) {
       const arrayErrors = validationError.details.map(
@@ -55,7 +51,6 @@ export async function validateGameSchema(
       )
       return res.status(400).send({ error: arrayErrors })
     }
-    console.log(2)
 
     res.locals.validGame = validGameInDatabase
   } catch (err) {
