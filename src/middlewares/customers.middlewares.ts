@@ -19,7 +19,7 @@ export async function validateExistenceCustomer(
 
     if (!existingUser) return res.sendStatus(404)
 
-    res.locals.user = user.rows[0]
+    res.locals.validUserInDatabase = user.rows[0]
   } catch (err) {
     return res.status(500).send({ error: err })
   }
