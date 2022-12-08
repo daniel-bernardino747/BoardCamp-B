@@ -1,8 +1,8 @@
 import express from 'express'
-import { getRentals } from '../controllers/rentals.controller.js'
+import * as rentals from '../controllers/rentals.controller.js'
 
 const routes = express.Router()
 
-routes.get('/rentals', getRentals)
+routes.get('/rentals', rentals.viewAll)
 
 export default routes
