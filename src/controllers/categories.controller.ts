@@ -10,3 +10,14 @@ export async function getCategories(req: Request, res: Response) {
     return res.status(500).send({ error: err })
   }
 }
+export async function postCategory(req: Request, res: Response) {
+  const { newCategory } = res.locals
+  try {
+    await connection.query('INSERT INTO categories (name) VALUES ($1);', [
+      newCategory,
+    ])
+    return res.sendStatus(201)
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+}
