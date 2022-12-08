@@ -9,7 +9,7 @@ const validationsToCreate = [
 
 const routes = express.Router()
 
-routes.get('/games', games.getGames)
+routes.get('/games', games.viewAll)
 
 routes.post('/games', validationsToCreate, games.createOne)
 
