@@ -1,7 +1,7 @@
 import express from 'express'
 
 import * as controller from '../controllers/customers.controller.js'
-import * as middle from '../middlewares/customers.middleware.js'
+import * as middle from '../middlewares/customers.middlewares.js'
 
 const routes = express.Router()
 
