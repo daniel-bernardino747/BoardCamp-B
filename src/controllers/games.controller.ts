@@ -10,3 +10,17 @@ export async function getGames(req: Request, res: Response) {
     return res.status(500).send({ error: err })
   }
 }
+export async function createOne(req: Request, res: Response) {
+  const {
+    validGame: { name, image = null, stockTotal, categoryId, pricePerDay },
+  } = res.locals
+  try {
+    await connection.query(
+      'INSERT INTO games (name,image,"stockTotal","categoryId","pricePerDay") VALUES ($1,$2,$3,$4,$5);',
+      [name, image, stockTotal, Number(categoryId), pricePerDay]
+    )
+    return res.sendStatus(201)
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+}
