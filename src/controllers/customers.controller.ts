@@ -10,3 +10,12 @@ export async function getCustomers(req: Request, res: Response) {
     return res.status(500).send({ error: err })
   }
 }
+
+export async function getCustomer(req: Request, res: Response) {
+  const { user } = res.locals
+  try {
+    return res.status(200).send({ message: user })
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+}
