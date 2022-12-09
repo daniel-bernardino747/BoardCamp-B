@@ -1,5 +1,7 @@
+import dayjs from 'dayjs'
 import { NextFunction, Request, Response } from 'express'
 import connection from '../database/index.js'
+import { rentalSchema } from '../models/rentals.models.js'
 
 export async function collectCustomerForRental(
   req: Request,
@@ -135,5 +137,106 @@ export async function joinCustomerAndGameInRental(
     return res.status(500).send({ error: err })
   }
 
+  return next()
+}
+export async function validateExistenceCustomerAndGame(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { customerId, gameId, daysRented } = req.body
+  try {
+    if (!customerId && !gameId) return res.sendStatus(400)
+
+    const searchCustomerInDatabase = await connection.query(
+      'SELECT * FROM customers WHERE id = $1;',
+      [Number(customerId)]
+    )
+    const searchGameInDatabase = await connection.query(
+      'SELECT * FROM games WHERE id = $1;',
+      [Number(gameId)]
+    )
+
+    const existingCustomer = !!searchCustomerInDatabase.rows.length
+    const existingGame = !!searchGameInDatabase.rows.length
+
+    if (!existingCustomer) return res.sendStatus(400)
+    if (!existingGame) return res.sendStatus(400)
+
+    res.locals.validRental = { customerId, gameId, daysRented }
+    res.locals.selectedGame = searchGameInDatabase.rows
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+  return next()
+}
+export async function calculateOriginalPrice(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { validRental, selectedGame } = res.locals
+  try {
+    const valuePerDay = selectedGame[0].pricePerDay
+    const daysRented = validRental.daysRented
+
+    const originalPrice = daysRented * valuePerDay
+
+    res.locals.validRental = { ...validRental, originalPrice }
+  } catch (err) {
+    return res.status(500).send(err)
+  }
+  return next()
+}
+export async function validateRentalSchema(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { validRental } = res.locals
+  try {
+    const rental = {
+      ...validRental,
+      rentDate: dayjs().format('YYYY-MM-DD'),
+      returnDate: null,
+      delayFee: null,
+    }
+    const { error: validationError } = rentalSchema.validate(rental, {
+      abortEarly: false,
+    })
+
+    if (validationError) {
+      const arrayErrors = validationError.details.map(
+        (errDetail) => errDetail.message
+      )
+      return res.status(400).send({ error: arrayErrors })
+    }
+    res.locals.newRental = rental
+  } catch (err) {
+    return res.status(500).send(err)
+  }
+  return next()
+}
+export async function validateGameAvailability(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { selectedGame } = res.locals
+  try {
+    const idOfProduct = selectedGame[0].id
+    const quantityInStock = selectedGame[0].stockTotal
+    const isPossibleRent = quantityInStock - 1 !== -1
+
+    if (!isPossibleRent) return res.sendStatus(400)
+
+    const removeItemFromStock = quantityInStock - 1
+    await connection.query('UPDATE games SET "stockTotal"=$1 WHERE id=$2', [
+      removeItemFromStock,
+      idOfProduct,
+    ])
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
   return next()
 }
