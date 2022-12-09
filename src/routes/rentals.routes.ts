@@ -13,11 +13,17 @@ const validationsToCreateRental = [
   middle.validateRentalSchema,
   middle.validateGameAvailability,
 ]
+const stepsToGiveBackRental = [
+  middle.validateReturnRent,
+  middle.prepareReturnDateAndDelayFee,
+]
 
 const routes = express.Router()
 
 routes.get('/rentals', collectDatasToRental, rentals.view)
 
 routes.post('/rentals', validationsToCreateRental, rentals.create)
+
+routes.post('/rentals/:id/return', stepsToGiveBackRental, rentals.giveBack)
 
 export default routes

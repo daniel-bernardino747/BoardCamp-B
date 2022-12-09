@@ -240,3 +240,74 @@ export async function validateGameAvailability(
   }
   return next()
 }
+export async function validateReturnRent(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { id } = req.params
+  try {
+    const searchForIdRent = await connection.query(
+      `
+      SELECT * FROM rentals
+      WHERE id=$1
+    `,
+      [id]
+    )
+    const searchAlreadyReturnRent = await connection.query(
+      `
+      SELECT * FROM rentals
+      WHERE id=$1 
+      AND "returnDate"<>null;
+    `,
+      [id]
+    )
+
+    const notExistRent = !searchForIdRent.rows.length
+    const alreadyReturnRent = !!searchAlreadyReturnRent.rows.length
+
+    if (notExistRent) return res.sendStatus(404)
+    if (alreadyReturnRent) return res.sendStatus(400)
+
+    res.locals.validRental = searchForIdRent.rows
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+  return next()
+}
+export async function prepareReturnDateAndDelayFee(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const {
+    validRental: [rental],
+  } = res.locals
+  try {
+    rental.returnDate = new Date()
+    const differenceOfDays = dayjs(rental.returnDate).diff(
+      dayjs(rental.rentDate),
+      'day'
+    )
+
+    const searchGameToReturnRent = await connection.query(
+      `
+      SELECT * FROM games
+      WHERE id=$1;
+    `,
+      [rental.gameId]
+    )
+    const gameThatWasRented = searchGameToReturnRent.rows[0]
+    const haveDelayFee = differenceOfDays > rental.daysRented
+
+    if (haveDelayFee) {
+      const delayedDays = differenceOfDays - rental.daysRented
+      const valueDelayFee = delayedDays * gameThatWasRented.pricePerDay
+      rental.delayFee = valueDelayFee
+    }
+    res.locals.finalizedRent = rental
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+  return next()
+}
