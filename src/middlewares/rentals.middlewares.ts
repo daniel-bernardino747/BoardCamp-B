@@ -325,16 +325,8 @@ export async function validateToDeleteRental(
     `,
       [id]
     )
-    const searchAlreadyReturnRent = await connection.query(
-      `
-      SELECT * FROM rentals
-      WHERE id=$1;
-    `,
-      [id]
-    )
     const notExistRent = !searchForIdRent.rows.length
-    const alreadyReturnRent =
-      !!searchAlreadyReturnRent.rows[0].returnDate !== null
+    const alreadyReturnRent = searchForIdRent.rows[0].returnDate !== null
 
     if (notExistRent) return res.sendStatus(404)
     if (!alreadyReturnRent) return res.sendStatus(400)
