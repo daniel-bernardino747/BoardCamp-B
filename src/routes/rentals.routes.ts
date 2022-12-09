@@ -7,9 +7,17 @@ const collectDatasToRental = [
   middle.collectGameForRental,
   middle.joinCustomerAndGameInRental,
 ]
+const validationsToCreateRental = [
+  middle.validateExistenceCustomerAndGame,
+  middle.calculateOriginalPrice,
+  middle.validateRentalSchema,
+  middle.validateGameAvailability,
+]
 
 const routes = express.Router()
 
 routes.get('/rentals', collectDatasToRental, rentals.view)
+
+routes.post('/rentals', validationsToCreateRental, rentals.create)
 
 export default routes
