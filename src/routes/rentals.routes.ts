@@ -10,6 +10,6 @@ const collectDatasToRental = [
 
 const routes = express.Router()
 
-routes.get('/rentals', collectDatasToRental, rentals.viewAll)
+routes.get('/rentals', collectDatasToRental, rentals.view)
 
 export default routes
