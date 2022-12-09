@@ -12,9 +12,9 @@ export async function viewAll(req: Request, res: Response) {
 }
 
 export async function viewOne(req: Request, res: Response) {
-  const { validUserInDatabase } = res.locals
+  const { validCustomer } = res.locals
   try {
-    return res.status(200).send({ message: validUserInDatabase })
+    return res.status(200).send({ message: validCustomer })
   } catch (err) {
     return res.status(500).send({ error: err })
   }
