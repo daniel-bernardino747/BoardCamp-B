@@ -38,7 +38,7 @@ export async function create(req: Request, res: Response) {
 }
 export async function giveBack(req: Request, res: Response) {
   const {
-    finalizedRent: { id, returnDate, delayFee },
+    finalizedRent: { id, gameId, returnDate, delayFee },
   } = res.locals
   try {
     await connection.query(
@@ -48,6 +48,16 @@ export async function giveBack(req: Request, res: Response) {
       `,
       [returnDate, delayFee, id]
     )
+    const searchGameInDatabase = await connection.query(
+      'SELECT * FROM games WHERE id = $1;',
+      [Number(gameId)]
+    )
+    const quantityInStock = searchGameInDatabase.rows[0].stockTotal
+    const addItemFromStock = quantityInStock + 1
+    await connection.query('UPDATE games SET "stockTotal"=$1 WHERE id=$2;', [
+      addItemFromStock,
+      Number(gameId),
+    ])
     return res.sendStatus(200)
   } catch (err) {
     return res.status(500).send({ error: err })
