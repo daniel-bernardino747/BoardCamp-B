@@ -24,6 +24,8 @@ routes.get('/rentals', collectDatasToRental, rentals.view)
 
 routes.post('/rentals', validationsToCreateRental, rentals.create)
 
+routes.delete('/rentals/:id', middle.validateToDeleteRental, rentals.remove)
+
 routes.post('/rentals/:id/return', stepsToGiveBackRental, rentals.giveBack)
 
 export default routes

@@ -53,3 +53,14 @@ export async function giveBack(req: Request, res: Response) {
     return res.status(500).send({ error: err })
   }
 }
+export async function remove(req: Request, res: Response) {
+  const { idValidToDelete } = res.locals
+  try {
+    await connection.query(`DELETE FROM rentals WHERE id=$1;`, [
+      idValidToDelete,
+    ])
+    return res.sendStatus(200)
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+}

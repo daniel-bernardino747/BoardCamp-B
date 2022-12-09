@@ -311,3 +311,37 @@ export async function prepareReturnDateAndDelayFee(
   }
   return next()
 }
+export async function validateToDeleteRental(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { id } = req.params
+  try {
+    const searchForIdRent = await connection.query(
+      `
+      SELECT * FROM rentals
+      WHERE id=$1
+    `,
+      [id]
+    )
+    const searchAlreadyReturnRent = await connection.query(
+      `
+      SELECT * FROM rentals
+      WHERE id=$1;
+    `,
+      [id]
+    )
+    const notExistRent = !searchForIdRent.rows.length
+    const alreadyReturnRent =
+      !!searchAlreadyReturnRent.rows[0].returnDate !== null
+
+    if (notExistRent) return res.sendStatus(404)
+    if (!alreadyReturnRent) return res.sendStatus(400)
+
+    res.locals.idValidToDelete = id
+  } catch (err) {
+    return res.status(500).send({ error: err })
+  }
+  return next()
+}
