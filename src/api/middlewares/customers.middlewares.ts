@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import connection from '../database/index.js'
+import connection from '../../database/index.js'
 import { customerSchema } from '../models/customers.models.js'
 // import connection from '@/database'
 

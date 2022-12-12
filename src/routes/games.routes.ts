@@ -1,6 +1,6 @@
 import express from 'express'
-import * as games from '../controllers/games.controller.js'
-import * as middle from '../middlewares/games.middlewares.js'
+import * as games from '../api/controllers/games.controller.js'
+import * as middle from '../api/middlewares/games.middlewares.js'
 
 const validationsToCreate = [
   middle.validateExistenceInDatabase,

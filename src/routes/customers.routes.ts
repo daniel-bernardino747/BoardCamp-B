@@ -1,7 +1,7 @@
 import express from 'express'
 
-import * as customers from '../controllers/customers.controller.js'
-import * as middle from '../middlewares/customers.middlewares.js'
+import * as customers from '../api/controllers/customers.controller.js'
+import * as middle from '../api/middlewares/customers.middlewares.js'
 
 const validationsToCreateCustomer = [
   middle.validateCustomerSchema,

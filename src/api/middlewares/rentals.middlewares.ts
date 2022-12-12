@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import { NextFunction, Request, Response } from 'express'
-import connection from '../database/index.js'
+import connection from '../../database/index.js'
 import { rentalSchema } from '../models/rentals.models.js'
 
 export async function collectCustomerForRental(
