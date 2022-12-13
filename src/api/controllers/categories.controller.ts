@@ -1,23 +1,23 @@
 import { Request, Response } from 'express'
-import connection from '../../database/index.js'
-// import connection from '@/database'
+import * as repository from '../repositories/categories.repositories.js'
 
 export async function viewAll(req: Request, res: Response) {
   try {
-    const categories = await connection.query('SELECT * FROM categories;')
+    const categories = await repository.allCategories()
+
     return res.status(200).send({ message: categories.rows })
-  } catch (err) {
+  } catch (err: unknown) {
     return res.status(500).send({ error: err })
   }
 }
+
 export async function create(req: Request, res: Response) {
-  const { newCategory } = res.locals
+  const newCategory: string = res.locals.newCategory
   try {
-    await connection.query('INSERT INTO categories (name) VALUES ($1);', [
-      newCategory,
-    ])
+    await repository.createCategory(newCategory)
+
     return res.sendStatus(201)
-  } catch (err) {
+  } catch (err: unknown) {
     return res.status(500).send({ error: err })
   }
 }
