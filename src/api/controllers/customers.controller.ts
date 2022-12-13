@@ -15,7 +15,7 @@ export async function viewOne(req: Request, res: Response) {
   const id: string = req.params.id
 
   try {
-    const customer = await existingCustomer(id)
+    const customer = await existingCustomer(Number(id))
 
     return res.status(200).send({ message: customer })
   } catch (err) {

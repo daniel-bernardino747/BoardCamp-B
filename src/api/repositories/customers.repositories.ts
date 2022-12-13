@@ -5,8 +5,17 @@ import connection from '../../database/index.js'
 export function viewCustomers(): Promise<QueryResult> {
   return connection.query('SELECT * FROM customers;')
 }
-export function viewOneCustomer(id: string): Promise<QueryResult> {
+export function customersToRental(): Promise<QueryResult> {
+  return connection.query('SELECT customers.id, customers.name FROM customers;')
+}
+export function viewOneCustomer(id: number): Promise<QueryResult> {
   return connection.query('SELECT * FROM customers WHERE id=$1;', [id])
+}
+export function oneCustomerToRental(id: string): Promise<QueryResult> {
+  return connection.query(
+    'SELECT customers.id, customers.name FROM customers WHERE id=$1;',
+    [id]
+  )
 }
 export function createCustomer(customer: Customer): Promise<QueryResult> {
   return connection.query(

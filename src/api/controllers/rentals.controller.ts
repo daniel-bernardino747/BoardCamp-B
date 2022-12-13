@@ -1,74 +1,94 @@
 import { Request, Response } from 'express'
-import connection from '../../database/index.js'
-// import connection from '@/database'
+
+import { Customer, Game, Rental, requestRental } from '../../types/objects.js'
+
+import * as customerServices from '../services/customers.services.js'
+import * as gameServices from '../services/games.services.js'
+import * as rentalServices from '../services/rentals.services.js'
+
+import * as rentalsRepo from '../repositories/rentals.repositories.js'
 
 export async function view(req: Request, res: Response) {
-  const { formatRental } = res.locals
+  const { customerId, gameId } = req.query
   try {
-    return res.status(200).send({ message: formatRental })
+    const customers = await customerServices.searchDesiredCustomers(customerId)
+    const games = await gameServices.searchDesiredGames(gameId)
+
+    const rentals = await rentalServices.joinRentalCustomersAndGames(
+      customers as Array<Customer>,
+      games as Array<Game>
+    )
+    return res.status(200).send({ message: rentals })
   } catch (err) {
     return res.status(500).send({ error: err })
   }
 }
 export async function create(req: Request, res: Response) {
-  const { newRental } = res.locals
+  const validRental: requestRental = res.locals.validRental
+
   try {
-    await connection.query(
-      `
-      INSERT INTO rentals 
-      ("customerId","gameId","rentDate","daysRented","returnDate","originalPrice","delayFee")
-      VALUES ($1,$2,$3,$4,$5,$6,$7);
-    `,
-      [
-        newRental.customerId,
-        newRental.gameId,
-        newRental.rentDate,
-        newRental.daysRented,
-        newRental.returnDate,
-        newRental.originalPrice,
-        newRental.delayFee,
-      ]
+    const selectedGame = await gameServices.existingGame(validRental.gameId)
+    const { id: gameId, pricePerDay } = selectedGame as Game
+    const rental = rentalServices.calculateReturnDateAndPrice(
+      pricePerDay,
+      validRental
     )
+
+    await customerServices.existingCustomer(validRental.customerId)
+    await gameServices.updateStockProduct(Number(gameId))
+
+    await rentalsRepo.createRental(rental)
 
     return res.sendStatus(201)
   } catch (err) {
-    console.error(err)
-    return res.status(500).send({ error: err })
+    switch (err) {
+      case 400:
+        return res.sendStatus(400)
+      case 404:
+        return res.sendStatus(404)
+      default:
+        return res.status(500).send({ error: err })
+    }
   }
 }
 export async function giveBack(req: Request, res: Response) {
-  const {
-    finalizedRent: { id, gameId, returnDate, delayFee },
-  } = res.locals
+  const { id } = req.params
   try {
-    await connection.query(
-      `
-      UPDATE rentals SET "returnDate"=$1,"delayFee"=$2
-      WHERE id=$3;
-      `,
-      [returnDate, delayFee, id]
+    await rentalServices.alreadyReturnRent(Number(id))
+
+    const rentToPay = await rentalServices.existingRent(Number(id))
+    const rental = await rentalServices.defineReturnDateAndDelayFee(
+      rentToPay as Rental
     )
-    const searchGameInDatabase = await connection.query(
-      'SELECT * FROM games WHERE id = $1;',
-      [Number(gameId)]
+
+    await rentalsRepo.finishRent(
+      rental.id as string,
+      rental.returnDate as string,
+      rental.delayFee as number
     )
-    const quantityInStock = searchGameInDatabase.rows[0].stockTotal
-    const addItemFromStock = quantityInStock + 1
-    await connection.query('UPDATE games SET "stockTotal"=$1 WHERE id=$2;', [
-      addItemFromStock,
-      Number(gameId),
-    ])
+
+    await gameServices.updateStockProduct(rental.gameId)
+
     return res.sendStatus(200)
   } catch (err) {
-    return res.status(500).send({ error: err })
+    switch (err) {
+      case 400:
+        return res.sendStatus(400)
+      case 404:
+        return res.sendStatus(404)
+      default:
+        return res.status(500).send({ error: err })
+    }
   }
 }
 export async function remove(req: Request, res: Response) {
-  const { idValidToDelete } = res.locals
+  const { id } = req.params
   try {
-    await connection.query(`DELETE FROM rentals WHERE id=$1;`, [
-      idValidToDelete,
-    ])
+    await rentalServices.existingRent(Number(id))
+    await rentalServices.alreadyReturnRent(Number(id))
+
+    await rentalsRepo.deleteRent(id)
+
     return res.sendStatus(200)
   } catch (err) {
     return res.status(500).send({ error: err })
