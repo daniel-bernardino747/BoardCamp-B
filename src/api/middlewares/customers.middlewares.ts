@@ -15,7 +15,7 @@ export async function validateCustomerSchema(
     })
 
     if (validationError) {
-      const arrayErrors = validationError.details.map(
+      const arrayErrors: string[] = validationError.details.map(
         (errDetail) => errDetail.message
       )
       return res.status(400).send({ error: arrayErrors })
