@@ -36,7 +36,7 @@ export function updateCustomer(customer: Customer): Promise<QueryResult> {
   )
 }
 export function existingCPF(cpf: string): Promise<QueryResult> {
-  return connection.query('SELECT * FROM customers WHERE cpf=$2;', [cpf])
+  return connection.query('SELECT * FROM customers WHERE cpf=$1;', [cpf])
 }
 export function otherCustomerWithThisCPF(
   id: string | undefined,

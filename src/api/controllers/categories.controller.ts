@@ -12,7 +12,7 @@ export async function viewAll(req: Request, res: Response) {
 }
 
 export async function create(req: Request, res: Response) {
-  const newCategory: string = res.locals.newCategory
+  const newCategory: string = res.locals.validCategoryInDatabase
   try {
     await repository.createCategory(newCategory)
 

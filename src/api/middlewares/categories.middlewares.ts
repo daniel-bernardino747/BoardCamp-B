@@ -38,7 +38,7 @@ export async function validateExistenceInDatabase(
 
     if (existingCategory) return res.sendStatus(409)
 
-    res.locals.validCategoryInDatabase = name
+    res.locals.validCategoryInDatabase = validNameCategory
   } catch (err) {
     return res.status(500).send({ error: err })
   }
